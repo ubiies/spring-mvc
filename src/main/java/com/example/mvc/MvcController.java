@@ -12,24 +12,27 @@ import java.util.Random;
 @Controller
 public class MvcController {
 
-    private int hitCount = 0;
+    // 사용하고 싶은 객체가 있을 경우 먼저 선언
+    // 변화하지 않는 객체 -> 주입받은 객체를 함부로 다뤘다가 똑같은 곳에 쓰고 있으면
+    // 다른 객체에 문제가 생길 수 있음으로 주입받은 대상 클래스에서 함부로 변화시키지 않도록
+    // final 붙여주기
+    private final LottoService lottoService;
+
+    // 생성자 생성하면 스프링이 알아서 빈 객체에 주입해줌 -> 의존성 주입을 하고 있는 모습(DI)
+    public MvcController(LottoService lottoService) {
+        this.lottoService = lottoService;
+    }
 
     @RequestMapping("/hits")
     public String hits(Model model) {
-        hitCount++;
+        int hitCount = lottoService.addHit();
         model.addAttribute("hits", hitCount);
         return "hits";
     }
 
     @RequestMapping("/lotto")
     public String lotto(Model model) {
-        // 6개의 입의의 숫자 만들기
-        List<Integer> winningNums = new ArrayList<>(); // 인터페이스 -> 구현체
-        Random random = new Random();
-        // random.nextInt(origin, bound) 임의의 정수를 반환하는 메소드
-        for (int i=0;i<6;i++){
-            winningNums.add(random.nextInt(1,46));
-        }
+        String winningNums = lottoService.lotto();
         model.addAttribute("winningNums", winningNums);
         return "lotto";
     }
